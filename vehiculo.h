@@ -1,14 +1,15 @@
 #include <SDL2/SDL.h>      
 #include <iostream>         
-#include <cstdlib>       
+#include <cstdlib>    
+#include "grafo.h"   
 using namespace std;
 
-class Carro {
+class Vehiculo {
 public:
-    Carro(string direccion, float velocidad, SDL_Renderer *ren, int x, int y);
-    ~Carro();
+    Vehiculo(string direccion, float velocidad, SDL_Renderer *ren, int x, int y);
+    ~Vehiculo();
 
-    void movimiento();
+    void movimiento(Grafo ciudad);
     void Render();
 
 private:
