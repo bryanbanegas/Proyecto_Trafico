@@ -21,9 +21,11 @@ public:
     Vehiculo(int id, string direccion, float velocidad, SDL_Renderer *ren, int x, int y);
     ~Vehiculo();
 
-    void movimiento(Grafo ciudad);
+    void Clear();
     void Render();
+    void movimiento(Grafo ciudad);
     int getID();
+    SDL_Rect& getRect();
 };
 
 #endif

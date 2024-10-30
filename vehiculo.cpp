@@ -10,6 +10,16 @@ Vehiculo::Vehiculo(int id, string direccion, float velocidad, SDL_Renderer *rend
 
 Vehiculo::~Vehiculo() {}
 
+void Vehiculo::Clear(){
+    SDL_SetRenderDrawColor(renderer,255,0,0,0);
+    SDL_RenderFillRect(renderer, &srcRect);
+}
+
+void Vehiculo::Render(){
+    SDL_SetRenderDrawColor(renderer,255,0,0,255);
+    SDL_RenderFillRect(renderer, &srcRect);
+}
+
 void Vehiculo::movimiento(Grafo ciudad){
     int n=rand();
 
@@ -30,14 +40,14 @@ void Vehiculo::movimiento(Grafo ciudad){
             direccion=inter->direcciones[n];
         }
     }
-}
 
-void Vehiculo::Render(){
-    SDL_SetRenderDrawColor(renderer,255,0,0,255);
-    SDL_RenderFillRect(renderer, &srcRect);
+    Render();
 }
-
 
 int Vehiculo::getID(){
     return id;
+}
+
+SDL_Rect& Vehiculo::getRect(){
+    return srcRect;
 }

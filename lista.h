@@ -49,11 +49,31 @@ public:
         }
     }
 
+    void clear(SDL_Renderer *renderer){
+        Lista* actual=this;
+        while(actual!=nullptr){
+            if(actual->listaDeVehiculos!=nullptr){
+                SDL_Rect rect=actual->listaDeVehiculos->getRect();
+                SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+                SDL_SetRenderDrawColor(renderer,0,0,0,0);
+                SDL_RenderFillRect(renderer,&rect);
+            }
+            actual=actual->siguiente;
+        }
+    }
+    
     void move(Grafo ciudad){
         Lista* actual=this;
         while(actual!=nullptr){
-            actual->listaDeVehiculos->Render();
             actual->listaDeVehiculos->movimiento(ciudad);
+            actual=actual->siguiente;
+        }
+    }
+
+    void render(){
+        Lista* actual=this;
+        while(actual!=nullptr){
+            actual->listaDeVehiculos->Render();
             actual=actual->siguiente;
         }
     }
