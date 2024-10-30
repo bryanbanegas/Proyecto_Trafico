@@ -1,7 +1,7 @@
 #include "vehiculo.h"
 
-Vehiculo::Vehiculo(string direccion, float velocidad, SDL_Renderer *rend, int x, int y)
-    : direccion(direccion), renderer(rend), xpos(x), ypos(y){
+Vehiculo::Vehiculo(int id, string direccion, float velocidad, SDL_Renderer *rend, int x, int y)
+    : id(id), direccion(direccion), velocidad(velocidad), renderer(rend), xpos(x), ypos(y){
     srcRect.x=xpos;
     srcRect.y=ypos;
     srcRect.w=32;
@@ -34,5 +34,10 @@ void Vehiculo::movimiento(Grafo ciudad){
 
 void Vehiculo::Render(){
     SDL_SetRenderDrawColor(renderer,255,0,0,255);
-    SDL_RenderFillRect(renderer,&srcRect);
+    SDL_RenderFillRect(renderer, &srcRect);
+}
+
+
+int Vehiculo::getID(){
+    return id;
 }

@@ -1,3 +1,6 @@
+#ifndef VEHICULO_H
+#define VEHICULO_H
+
 #include <SDL2/SDL.h>      
 #include <iostream>         
 #include <cstdlib>    
@@ -5,17 +8,22 @@
 using namespace std;
 
 class Vehiculo {
+private:
+    int id;
+    string direccion;
+    float velocidad;
+    int xpos, ypos;
+    SDL_Rect srcRect;
+    SDL_Renderer *renderer;
 public:
-    Vehiculo(string direccion, float velocidad, SDL_Renderer *ren, int x, int y);
+    Vehiculo *siguiente=nullptr;
+
+    Vehiculo(int id, string direccion, float velocidad, SDL_Renderer *ren, int x, int y);
     ~Vehiculo();
 
     void movimiento(Grafo ciudad);
     void Render();
-
-private:
-    string direccion;
-    int xpos;
-    int ypos;
-    SDL_Rect srcRect;
-    SDL_Renderer *renderer;
+    int getID();
 };
+
+#endif

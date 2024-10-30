@@ -1,7 +1,7 @@
-#include "vehiculo.h"
+#include "lista.h"
 #include "grafo.h"
 
-Vehiculo *carro;
+Lista vehiculos;
 Grafo ciudad;
 
 void construirCiudad(Grafo &ciudad, SDL_Renderer *renderer){
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     ciudad.agregarInterseccion(direcciones4,7,300,500);
     ciudad.agregarInterseccion(direcciones6,8,500,500);
     
-    carro=new Vehiculo("down",230, renderer, 100, 100);
+    vehiculos.agregar(1,"down",230, renderer, 100, 100);
     
     ciudad.agregarCalle(0,1);
     ciudad.agregarCalle(0,3);
@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 
     SDL_Event event;
     bool run=true;
+
     while(run){
         if(SDL_PollEvent(&event)){
             if(SDL_QUIT==event.type){
@@ -107,11 +108,9 @@ int main(int argc, char *argv[])
 
         SDL_SetRenderDrawColor(renderer,0,0,0,255);
         SDL_RenderClear(renderer);
-
-        construirCiudad(ciudad, renderer);
         
-        carro->Render();
-        carro->movimiento(ciudad);
+        construirCiudad(ciudad, renderer);
+        vehiculos.move(ciudad);
 
         SDL_RenderPresent(renderer);
 
@@ -120,7 +119,6 @@ int main(int argc, char *argv[])
 
     for(auto &pair:ciudad.intersecciones)delete pair.second;
     for(Calle *calle:ciudad.calles)delete calle;
-    delete carro;
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
