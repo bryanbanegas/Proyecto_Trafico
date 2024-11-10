@@ -40,8 +40,6 @@ void Vehiculo::movimiento(Grafo ciudad){
             direccion=inter->direcciones[n];
         }
     }
-
-    Render();
 }
 
 int Vehiculo::getID(){
