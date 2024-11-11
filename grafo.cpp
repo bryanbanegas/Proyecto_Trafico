@@ -2,7 +2,7 @@
 #include <iostream>
 
 void Grafo::agregarInterseccion(string direcciones[2], int id, int x, int y){
-    intersecciones[id]=new Interseccion(direcciones,id,x,y,0);
+    intersecciones[id]=new Interseccion(direcciones,id,x,y);
 }
 
 void Grafo::agregarCalle(int origen, int destino){

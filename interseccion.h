@@ -9,21 +9,17 @@ public:
     string direcciones[2];
     int id, x, y, cantidadCalles;
 public:
-    Interseccion(string direccion[2], int iD, int xpos, int ypos, int cantidad){
+    Interseccion(string direccion[2], int iD, int xpos, int ypos){
         direcciones[0]=direccion[0];
         direcciones[1]=direccion[1];
         id=iD; 
         x=xpos; 
         y=ypos;
-        cantidadCalles=cantidad;
+        cantidadCalles=0;
     }
 
     void calleAgregada(){
         cantidadCalles++;
-    }
-
-    int getCantidadCalles(){
-        return cantidadCalles;
     }
 };
 
