@@ -14,7 +14,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(${PROJECT_NAME} main.cpp vehiculo.cpp grafo.cpp) 
+add_executable(${PROJECT_NAME} main.cpp vehiculo.cpp grafo.cpp arbol.cpp) 
 
 target_link_libraries(${PROJECT_NAME} 
     SDL2::SDL2

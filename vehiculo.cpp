@@ -24,14 +24,15 @@ void Vehiculo::movimiento(Grafo ciudad){
     string dir[2];
     int n=rand(),contar=-1;
     bool terminar=false;
+
     if(direccion=="right"){
         srcRect.x++;
     }else if(direccion=="left"){
-        srcRect.x--;
+        srcRect.x-=velocidad/100;
     }else if(direccion=="up"){
-        srcRect.y--;
+        srcRect.y-=velocidad/100;
     }else if(direccion=="down"){
-        srcRect.y++;
+        srcRect.y+=velocidad/100;
     }
 
 

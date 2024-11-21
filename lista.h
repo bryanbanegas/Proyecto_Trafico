@@ -63,18 +63,48 @@ public:
     }
     
     void move(Grafo ciudad){
-        Lista* actual=this;
+        Lista *actual=this;
+        Vehiculo *carro;
         while(actual!=nullptr){
-            actual->listaDeVehiculos->movimiento(ciudad);
+            carro=actual->listaDeVehiculos;
+            if(!checkCollision(carro)){
+                carro->movimiento(ciudad);
+                carro->move==true;
+            }else{
+                if(carro->move){
+                    carro->movimiento(ciudad);
+                }
+            }
             actual=actual->siguiente;
         }
     }
 
     void render(){
-        Lista* actual=this;
+        Lista *actual=this;
         while(actual!=nullptr){
             actual->listaDeVehiculos->Render();
             actual=actual->siguiente;
         }
+    }
+
+    bool checkCollision(Vehiculo *srcRect){
+        Lista *actual=this;
+        while(actual!=nullptr){
+            if(srcRect->getID()!=actual->listaDeVehiculos->getID()){
+                if(!(srcRect->ypos+32<=actual->listaDeVehiculos->ypos||
+                    srcRect->ypos>=actual->listaDeVehiculos->ypos+32||
+                    srcRect->xpos+45<=actual->listaDeVehiculos->xpos||
+                    srcRect->xpos>=actual->listaDeVehiculos->xpos+45)){
+                    if(actual->listaDeVehiculos->move){
+                        srcRect->move=false;
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+            }
+            actual=actual->siguiente;
+        }
+        return false;
     }
 };

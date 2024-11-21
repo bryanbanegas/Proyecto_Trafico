@@ -12,10 +12,11 @@ private:
     int id;
     string direccion;
     float velocidad;
-    int xpos, ypos;
     SDL_Rect srcRect;
     SDL_Renderer *renderer;
 public:
+    int xpos, ypos;
+    bool move=true;
     Vehiculo *siguiente=nullptr;
 
     Vehiculo(int id, string direccion, float velocidad, SDL_Renderer *ren, int x, int y);
