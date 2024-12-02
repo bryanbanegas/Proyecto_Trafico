@@ -7,26 +7,38 @@
 #include "grafo.h"   
 using namespace std;
 
+#include <SDL2/SDL.h>      
+#include <iostream>         
+#include <cstdlib>    
+#include "grafo.h"   
+ 
+using namespace std;
+
 class Vehiculo {
 private:
     int id;
     string direccion;
-    float velocidad;
     SDL_Rect srcRect;
     SDL_Renderer *renderer;
 public:
-    int xpos, ypos;
+    string originalDireccion;
+    bool ambulance;
     bool move=true;
+    bool moveForAmbulance=false;
+    const vector<int> camino;
+    vector<int>  caminosRecorridos;
+    int xpos, ypos, originalX, originalY;
     Vehiculo *siguiente=nullptr;
 
-    Vehiculo(int id, string direccion, float velocidad, SDL_Renderer *ren, int x, int y);
+    Vehiculo(int id, string direccion, bool ambulance, SDL_Renderer *ren, int x, int y, vector<int> camino);
     ~Vehiculo();
 
-    void Clear();
+    string movimiento(const Grafo &ciudad);
     void Render();
-    void movimiento(Grafo ciudad);
     int getID();
-    SDL_Rect& getRect();
+    SDL_Rect getRect();
+    string getDireccion();
+    void setDireccion(string direc);
 };
 
 #endif
