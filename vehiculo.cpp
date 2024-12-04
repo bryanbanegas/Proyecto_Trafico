@@ -12,13 +12,30 @@ Vehiculo::Vehiculo(int id, string direccion, bool ambulance, SDL_Renderer *rend,
 
 Vehiculo::~Vehiculo() {}
 
-string Vehiculo::movimiento(const Grafo &ciudad){
+string Vehiculo::movimiento(const Grafo &ciudad, const int sizeRecrt){
+    srcRect.x=xpos;
+    srcRect.y=ypos;
+    srcRect.w=sizeRecrt+10;
+    srcRect.h=sizeRecrt+10;
     string dir[2];
     int n=rand(),contar=-1;
     bool terminar=false,yaRecorrido=false;
     Interseccion *inter,*inter2;
 
     if(ambulance){
+        if(direccion=="right"){
+            srcRect.x++;
+            xpos=srcRect.x;
+        }else if(direccion=="left"){
+            srcRect.x--;
+            xpos=srcRect.x;
+        }else if(direccion=="up"){
+            srcRect.y--;
+            ypos=srcRect.y;
+        }else if(direccion=="down"){
+            srcRect.y++;
+            ypos=srcRect.y;
+        }
         caminosRecorridos[0]=0;
         caminosRecorridos[1]=1;
         for(auto &pair:ciudad.intersecciones){
@@ -26,7 +43,7 @@ string Vehiculo::movimiento(const Grafo &ciudad){
             if(srcRect.x==inter->x&&srcRect.y==inter->y){
                 for(auto &pair2:ciudad.intersecciones){
                     inter2=pair2.second;
-                    if(srcRect.x+100==inter2->x&&srcRect.y==inter2->y){
+                    if(srcRect.x+ciudad.distancia==inter2->x&&srcRect.y==inter2->y){
                         for(int i=0;i<camino.size();i++){
                             if(inter2->id==camino.at(i)&&inter2->id!=caminosRecorridos.at(i)){
                                 int valor=inter2->id;
@@ -37,7 +54,7 @@ string Vehiculo::movimiento(const Grafo &ciudad){
                             }
                         }
                     }
-                    if(srcRect.x-100==inter2->x&&srcRect.y==inter2->y){
+                    if(srcRect.x-ciudad.distancia==inter2->x&&srcRect.y==inter2->y){
                         for(int i=0;i<camino.size();i++){
                             if(inter2->id==camino.at(i)&&inter2->id!=caminosRecorridos.at(i)){
                                 int valor=inter2->id;
@@ -48,7 +65,7 @@ string Vehiculo::movimiento(const Grafo &ciudad){
                             }
                         }
                     }
-                    if(srcRect.x==inter2->x&&srcRect.y-100==inter2->y){
+                    if(srcRect.x==inter2->x&&srcRect.y-ciudad.distancia==inter2->y){
                         for(int i=0;i<camino.size();i++){
                             if(inter2->id==camino.at(i)&&inter2->id!=caminosRecorridos.at(i)){
                                 int valor=inter2->id;
@@ -59,7 +76,7 @@ string Vehiculo::movimiento(const Grafo &ciudad){
                             }
                         }
                     }
-                    if(srcRect.x==inter2->x&&srcRect.y+100==inter2->y){
+                    if(srcRect.x==inter2->x&&srcRect.y+ciudad.distancia==inter2->y){
                         for(int i=0;i<camino.size();i++){
                             if(inter2->id==camino.at(i)&&inter2->id!=caminosRecorridos.at(i)){
                                 int valor=inter2->id;
@@ -79,46 +96,42 @@ string Vehiculo::movimiento(const Grafo &ciudad){
     }else{
         for(auto &pair:ciudad.intersecciones){
             inter=pair.second;
-            //derecha
-            if(srcRect.x>=inter->x-20&&srcRect.x<=inter->x&&srcRect.y==inter->y&&inter->semaforo&&inter->color=="red"&&direccion=="right"){
+            if(srcRect.x>=inter->x-srcRect.w&&srcRect.x<=inter->x&&srcRect.y==inter->y&&inter->semaforo&&inter->color=="red"&&direccion=="right"){
                 if(!moveForAmbulance){
                     originalDireccion=direccion;
                     direccion="parar";
                 }
-            }else if(srcRect.x>=inter->x-20&&srcRect.x<=inter->x&&srcRect.y==inter->y&&inter->semaforo&&inter->color=="green"&&direccion=="parar"){
+            }else if(srcRect.x>=inter->x-srcRect.w&&srcRect.x<=inter->x&&srcRect.y==inter->y&&inter->semaforo&&inter->color=="green"&&direccion=="parar"){
                 if(!moveForAmbulance){
                     direccion=originalDireccion;
                 }
             }
-            //izquierda
-            if(srcRect.x>=inter->x&&srcRect.x<=inter->x+20&&srcRect.y==inter->y&&inter->semaforo&&inter->color=="red"&&direccion=="left"){
+            if(srcRect.x>=inter->x&&srcRect.x<=inter->x+srcRect.w&&srcRect.y==inter->y&&inter->semaforo&&inter->color=="red"&&direccion=="left"){
                 if(!moveForAmbulance){
                     originalDireccion=direccion;
                     direccion="parar";
                 }
-            }else if(srcRect.x>=inter->x&&srcRect.x<=inter->x+20&&srcRect.y==inter->y&&inter->semaforo&&inter->color=="green"&&direccion=="parar"){
+            }else if(srcRect.x>=inter->x&&srcRect.x<=inter->x+srcRect.w&&srcRect.y==inter->y&&inter->semaforo&&inter->color=="green"&&direccion=="parar"){
                 if(!moveForAmbulance){
                     direccion=originalDireccion;
                 }
             }
-            //arriba
-            if(srcRect.x==inter->x&&srcRect.y>=inter->y&&srcRect.y<=inter->y+20&&inter->semaforo&&inter->color=="red"&&direccion=="up"){
+            if(srcRect.x==inter->x&&srcRect.y>=inter->y&&srcRect.y<=inter->y+srcRect.w&&inter->semaforo&&inter->color=="red"&&direccion=="up"){
                 if(!moveForAmbulance){
                     originalDireccion=direccion;
                     direccion="parar";
                 }
-            }else if(srcRect.x==inter->x&&srcRect.y>=inter->y&&srcRect.y<=inter->y+20&&inter->semaforo&&inter->color=="green"&&direccion=="parar"){
+            }else if(srcRect.x==inter->x&&srcRect.y>=inter->y&&srcRect.y<=inter->y+srcRect.w&&inter->semaforo&&inter->color=="green"&&direccion=="parar"){
                 if(!moveForAmbulance){
                     direccion=originalDireccion;
                 }
             }
-            //abajo
-            if(srcRect.x==inter->x&&srcRect.y>=inter->y-20&&srcRect.y<=inter->y&&inter->semaforo&&inter->color=="red"&&direccion=="down"){
+            if(srcRect.x==inter->x&&srcRect.y>=inter->y-srcRect.w&&srcRect.y<=inter->y&&inter->semaforo&&inter->color=="red"&&direccion=="down"){
                 if(!moveForAmbulance){
                     originalDireccion=direccion;
                     direccion="parar";
                 }
-            }else if(srcRect.x==inter->x&&srcRect.y>=inter->y-20&&srcRect.y<=inter->y&&inter->semaforo&&inter->color=="green"&&direccion=="parar"){
+            }else if(srcRect.x==inter->x&&srcRect.y>=inter->y-srcRect.w&&srcRect.y<=inter->y&&inter->semaforo&&inter->color=="green"&&direccion=="parar"){
                 if(!moveForAmbulance){
                     direccion=originalDireccion;
                 }
@@ -129,25 +142,25 @@ string Vehiculo::movimiento(const Grafo &ciudad){
             if(srcRect.x==inter->x&&srcRect.y==inter->y){
                 for(auto &pair2:ciudad.intersecciones){
                     inter2=pair2.second;
-                    if(srcRect.x+100==inter2->x&&srcRect.y==inter2->y&&inter2->disponible){
+                    if(srcRect.x+ciudad.distancia==inter2->x&&srcRect.y==inter2->y&&inter2->disponible){
                         if(inter->direcciones[0]=="right"||inter->direcciones[1]=="right"){
                             contar++;
                             dir[contar]="right";
                         }
                     }
-                    if(srcRect.x-100==inter2->x&&srcRect.y==inter2->y&&inter2->disponible){
+                    if(srcRect.x-ciudad.distancia==inter2->x&&srcRect.y==inter2->y&&inter2->disponible){
                         if(inter->direcciones[0]=="left"||inter->direcciones[1]=="left"){
                             contar++;
                             dir[contar]="left";
                         }
                     }
-                    if(srcRect.x==inter2->x&&srcRect.y-100==inter2->y&&inter2->disponible){
+                    if(srcRect.x==inter2->x&&srcRect.y-ciudad.distancia==inter2->y&&inter2->disponible){
                         if(inter->direcciones[0]=="up"||inter->direcciones[1]=="up"){
                             contar++;
                             dir[contar]="up";
                         }
                     }
-                    if(srcRect.x==inter2->x&&srcRect.y+100==inter2->y&&inter2->disponible){
+                    if(srcRect.x==inter2->x&&srcRect.y+ciudad.distancia==inter2->y&&inter2->disponible){
                         if(inter->direcciones[0]=="down"||inter->direcciones[1]=="down"){
                             contar++;
                             dir[contar]="down";                        
@@ -167,9 +180,6 @@ string Vehiculo::movimiento(const Grafo &ciudad){
 
     if(direccion=="right"){
         srcRect.x++;
-        if(ambulance){
-            srcRect.x++;
-        }
         xpos=srcRect.x;
     }else if(direccion=="left"){
         srcRect.x--;
@@ -185,15 +195,13 @@ string Vehiculo::movimiento(const Grafo &ciudad){
     return direccion;
 }
 
-void Vehiculo::Render(){
+void Vehiculo::Render(const int sizeRecrt){
     if(ambulance){
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     }else{
         SDL_SetRenderDrawColor(renderer,255,0,0,255);
     }
-    if(id!=0){
-        SDL_RenderFillRect(renderer, &srcRect);
-    }
+    SDL_RenderFillRect(renderer, &srcRect);
 }
 
 int Vehiculo::getID(){

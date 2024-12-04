@@ -7,7 +7,7 @@ using namespace std;
 class Interseccion{
 public:
     string direcciones[2];
-    int id, x, y;
+    int id, x, y, xTemporal, yTemporal;
 public:
     bool disponible=true;
     bool semaforo=false;
@@ -19,6 +19,8 @@ public:
         id=iD; 
         x=xpos; 
         y=ypos;
+        xTemporal=xpos/100;
+        yTemporal=ypos/100;
     }
 };
 

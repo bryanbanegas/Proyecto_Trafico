@@ -21,6 +21,7 @@ private:
     SDL_Rect srcRect;
     SDL_Renderer *renderer;
 public:
+    Vehiculo *siguiente=nullptr;
     string originalDireccion;
     bool ambulance;
     bool move=true;
@@ -28,13 +29,12 @@ public:
     const vector<int> camino;
     vector<int>  caminosRecorridos;
     int xpos, ypos, originalX, originalY;
-    Vehiculo *siguiente=nullptr;
 
     Vehiculo(int id, string direccion, bool ambulance, SDL_Renderer *ren, int x, int y, vector<int> camino);
     ~Vehiculo();
 
-    string movimiento(const Grafo &ciudad);
-    void Render();
+    string movimiento(const Grafo &ciudad,const int sizeRecrt);
+    void Render(const int sizeRecrt);
     int getID();
     SDL_Rect getRect();
     string getDireccion();

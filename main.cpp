@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "lista.h"
 #include "grafo.h"
 #include "arbol.h"
@@ -9,8 +10,8 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *backgroundTexture;
 bool build=true;
-int cantidadCalles=-1,cantidadIntersecciones,cantidadVehiculos=0;
-
+int sizeRect=10;
+float delayPorZoom=10;
 //Hola, Analfabeto. Suerte!! xoxo (jenn)
 
 void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
@@ -34,10 +35,7 @@ void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
         ciudad.agregarInterseccion(direcciones2,9,300,300);
 
         vector<int> sinCamino;
-        vehiculos.agregar(0,"hgsavjuda",false, renderer, 700, 0, sinCamino);
-        vehiculos.agregar(1,"right",false, renderer, 280, 300, sinCamino);
-        //vehiculos.agregar(2,"right",false, renderer, 210, 300,sinCamino);
-        cantidadVehiculos++;
+        vehiculos.agregar("right",false, renderer, 100, 100, sinCamino);
     
         ciudad.agregarCalle(0,1);
         ciudad.agregarCalle(1,2);
@@ -60,16 +58,17 @@ void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
         arbolDeClimas.agregar("Tormenta Electrica",150);
 
         build=false;
+        ciudad.calcularDistancia();
     }
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     for(Calle *calle:ciudad.calles){
-        cantidadCalles++;
-        SDL_RenderDrawLine(renderer, calle->origen->x+5, calle->origen->y+5, calle->destino->x+5, calle->destino->y+5);
+        
+        SDL_RenderDrawLine(renderer, calle->origen->x+sizeRect/2, calle->origen->y+sizeRect/2, calle->destino->x+sizeRect/2, calle->destino->y+sizeRect/2);
     }
 
     Interseccion *inter;
-    int n;
+    int n=0;
     for(auto &pair:ciudad.intersecciones){
         inter=pair.second;
         n=inter->y/100;
@@ -80,9 +79,8 @@ void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for(auto &pair:ciudad.intersecciones){
-        cantidadIntersecciones++;
         inter=pair.second;
-        SDL_Rect rect={inter->x, inter->y, 10, 10};
+        SDL_Rect rect={inter->x, inter->y, sizeRect, sizeRect};
         if(!inter->semaforo){
             SDL_SetRenderDrawColor(renderer, 255, 165, 0, 255);
         }else{
@@ -96,12 +94,17 @@ void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
     }
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_Rect button1={700, 0, 50, 50};
-    SDL_RenderFillRect(renderer, &button1);
-    SDL_Rect button2={700, 100, 50, 50};
-    SDL_RenderFillRect(renderer, &button2);
-    SDL_Rect button3={700, 200, 50, 50};
-    SDL_RenderFillRect(renderer, &button3);
+    SDL_Rect button;
+    button={700, 0, 50, 50};
+    SDL_RenderFillRect(renderer, &button);
+    button={700, 100, 50, 50};
+    SDL_RenderFillRect(renderer, &button);
+    button={700, 200, 50, 50};
+    SDL_RenderFillRect(renderer, &button);
+    button={700, 300, 50, 50};
+    SDL_RenderFillRect(renderer, &button);
+    button={760, 300, 50, 50};
+    SDL_RenderFillRect(renderer, &button);
 }
 double calculateDistance(int x1, int y1, int x2, int y2) {
     return std::sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
@@ -123,25 +126,23 @@ int blockIntersection(int x, int y) {
         inter=pair.second;
         if (inter->id==nearestInter->id) {
             nearestInter->disponible=false;
-            cout<<"Interseccion bloqueada: "<<nearestInter->id<<endl;
+            cout<<"Choque que en la Interseccion: "<<nearestInter->id<<endl;
             return nearestInter->id;
         }
     }
     return 0;
 }
 void addVehiculo(){
-    int n=rand();
+    int n=0;
     vector<int> sincamino;
     bool terminar=false;
-    cantidadVehiculos++;
     while(!terminar){
-        n=rand()%cantidadIntersecciones;
+        n=rand()%ciudad.intersecciones.size();
         if(ciudad.intersecciones.at(n)->disponible){
-            vehiculos.agregar(cantidadVehiculos,ciudad.intersecciones.at(n)->direcciones[0],false,renderer,ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y,sincamino);
-            if(!vehiculos.collision(vehiculos.getVehiculo(cantidadVehiculos))){
+            if(!vehiculos.collision(ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y)){
+                vehiculos.agregar(ciudad.intersecciones.at(n)->direcciones[0],false,renderer,ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y,sincamino);
                 terminar=true;
-            }else{
-                vehiculos.eliminar(cantidadVehiculos);
+                cout<<"Se creo un vehiculo."<<endl;
             }
         }
     }
@@ -152,26 +153,24 @@ void createBackgroundTexture(){
     SDL_SetRenderTarget(renderer, backgroundTexture);
     SDL_SetRenderDrawColor(renderer,0,0,0,255);
     SDL_RenderClear(renderer);
-    cantidadCalles=0;
-    cantidadIntersecciones=0;
     buildCity(ciudad,renderer);
 
     SDL_SetRenderTarget(renderer, NULL);
 }
 void addCalle(){
-    int n=rand(), num=cantidadIntersecciones+1, limite=0;
+    int n=0, num=ciudad.intersecciones.size(), limite=0;
     bool yaCreo=false,crearCalle,terminar=false,crearDerecha=true,crearIzquierda=true,crearArriba=true,crearAbajo=true;
 
     while(!terminar){
         limite++;
-        n=rand()%cantidadIntersecciones;
-        if(n<cantidadIntersecciones&&ciudad.intersecciones.count(n)>0){
+        n=rand()%ciudad.intersecciones.size();
+        if(n<ciudad.intersecciones.size()&&ciudad.intersecciones.count(n)>0){
             for(auto &pair:ciudad.intersecciones){
                 Interseccion *inter=pair.second;
                 if(ciudad.intersecciones.at(n)->x==0){
                     crearIzquierda=false;
                 }
-                if(ciudad.intersecciones.at(n)->x+100==inter->x&&ciudad.intersecciones.at(n)->y==inter->y){
+                if(ciudad.intersecciones.at(n)->x+ciudad.distancia==inter->x&&ciudad.intersecciones.at(n)->y==inter->y){
                     crearDerecha=false;
                     crearCalle=true;
                     for(Calle *calle:ciudad.calles){
@@ -186,7 +185,7 @@ void addCalle(){
                         yaCreo=true;
                     }
                 }
-                if(ciudad.intersecciones.at(n)->x-100==inter->x&&ciudad.intersecciones.at(n)->y==inter->y){
+                if(ciudad.intersecciones.at(n)->x-ciudad.distancia==inter->x&&ciudad.intersecciones.at(n)->y==inter->y){
                     crearIzquierda=false;
                     crearCalle=true;
                     for(Calle *calle:ciudad.calles){
@@ -201,7 +200,7 @@ void addCalle(){
                         yaCreo=true;
                     }
                 }
-                if(ciudad.intersecciones.at(n)->x==inter->x&&ciudad.intersecciones.at(n)->y+100==inter->y){
+                if(ciudad.intersecciones.at(n)->x==inter->x&&ciudad.intersecciones.at(n)->y+ciudad.distancia==inter->y){
                     crearAbajo=false;
                     crearCalle=true;
                     for(Calle *calle:ciudad.calles){
@@ -219,15 +218,36 @@ void addCalle(){
             }
             if(!yaCreo){
                 if(crearDerecha){
-                    ciudad.agregarInterseccion(ciudad.intersecciones.at(n)->direcciones,num,ciudad.intersecciones.at(n)->x+100,ciudad.intersecciones.at(n)->y);
+                    string dir[2];
+                    if(ciudad.intersecciones.at(n)->direcciones[1]=="up"){
+                        dir[1]="down";
+                    }else if(ciudad.intersecciones.at(n)->direcciones[1]=="down"){
+                        dir[1]="up";
+                    }
+                    dir[0]=ciudad.intersecciones.at(n)->direcciones[0];
+                    ciudad.agregarInterseccion(dir,num,ciudad.intersecciones.at(n)->x+ciudad.distancia,ciudad.intersecciones.at(n)->y);
                     ciudad.agregarCalle(ciudad.intersecciones.at(n)->id,num);
                     terminar=true;
                 }else if(crearIzquierda){
-                    ciudad.agregarInterseccion(ciudad.intersecciones.at(n)->direcciones,num,ciudad.intersecciones.at(n)->x-100,ciudad.intersecciones.at(n)->y);
+                    string dir[2];
+                    if(ciudad.intersecciones.at(n)->direcciones[1]=="up"){
+                        dir[1]="down";
+                    }else if(ciudad.intersecciones.at(n)->direcciones[1]=="down"){
+                        dir[1]="up";
+                    }
+                    dir[0]=ciudad.intersecciones.at(n)->direcciones[0];
+                    ciudad.agregarInterseccion(dir,num,ciudad.intersecciones.at(n)->x-ciudad.distancia,ciudad.intersecciones.at(n)->y);
                     ciudad.agregarCalle(ciudad.intersecciones.at(n)->id,num);
                     terminar=true;
                 }else if(crearAbajo){
-                    ciudad.agregarInterseccion(ciudad.intersecciones.at(n)->direcciones,num,ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y+100);
+                    string dir[2];
+                    if(ciudad.intersecciones.at(n)->direcciones[0]=="right"){
+                        dir[0]="left";
+                    }else if(ciudad.intersecciones.at(n)->direcciones[0]=="left"){
+                        dir[0]="right";
+                    }
+                    dir[1]=ciudad.intersecciones.at(n)->direcciones[1];
+                    ciudad.agregarInterseccion(dir,num,ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y+ciudad.distancia);
                     ciudad.agregarCalle(ciudad.intersecciones.at(n)->id,num);
                     terminar=true;
                 }
@@ -238,8 +258,6 @@ void addCalle(){
             cout<<"Se llego al limite."<<endl;
         }
     }
-
-    
     createBackgroundTexture();
 }
 int main(int argc, char *argv[]) {
@@ -288,24 +306,48 @@ int main(int argc, char *argv[]) {
                 if(x>=700&&x<=750&&y>=200&&y<=250){
                     addVehiculo();
                 }
+                if(x>=700&&x<=750&&y>=300&&y<=350){
+                    int mult, n=sizeRect;
+                    sizeRect--;
+                    for(auto &pair:ciudad.intersecciones){
+                        inter=pair.second;
+                        mult=sizeRect*10;
+                        inter->x=inter->xTemporal*mult;
+                        inter->y=inter->yTemporal*mult;
+                    }
+                    ciudad.calcularDistancia();
+                    vehiculos.updatePos(n);
+                    createBackgroundTexture();
+                }
+                if(x>=760&&x<=810&&y>=300&&y<=350){
+                    int mult, n=-sizeRect;
+                    sizeRect++;
+                    for(auto &pair:ciudad.intersecciones){
+                        inter=pair.second;
+                        mult=sizeRect*10;
+                        inter->x=inter->xTemporal*mult;
+                        inter->y=inter->yTemporal*mult;
+                    }
+                    ciudad.calcularDistancia();
+                    vehiculos.updatePos(n);
+                    createBackgroundTexture();
+                }
             }
         }
 
-        SDL_Delay(arbolDeClimas.getRangoDeClima(climaActual));
-        vehiculos.move(ciudad);
+        SDL_Delay(arbolDeClimas.getRangoDeClima(climaActual)/sizeRect);
+        vehiculos.move(ciudad,sizeRect);
         if(vehiculos.choque){
             int destino=blockIntersection(vehiculos.choqueX,vehiculos.choqueY);
             unordered_map<int, int> padres;
             int distancia=ciudad.dijkstra(0,destino,padres);
             if(destino!=-1){
                 vector<int> camino=ciudad.reconstruirCamino(0,destino,padres);
-                cantidadVehiculos++;
-                vehiculos.agregar(cantidadVehiculos,"right", true, renderer, 0, 100, camino);
+                vehiculos.agregar("right", true, renderer, 0, 100, camino);
+            }else{
+                cout<<"no funciono"<<endl;
             }
             vehiculos.choque=false;
-        }
-        if(vehiculos.eliminarVehiculo){
-            vehiculos.eliminar(vehiculos.idEliminar);
         }
         contar++;
         if(contar==100){
@@ -327,7 +369,7 @@ int main(int argc, char *argv[]) {
 
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
-        vehiculos.render();
+        vehiculos.render(sizeRect);
 
         SDL_RenderPresent(renderer);
 
