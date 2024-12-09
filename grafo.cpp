@@ -1,8 +1,7 @@
 #include "grafo.h"
-#include <iostream>
 
-void Grafo::agregarInterseccion(string direcciones[2], int id, int x, int y){
-    intersecciones[id]=new Interseccion(direcciones,id,x,y);
+void Grafo::agregarInterseccion(string direcciones[2], int id, int x, int y, int sizeRect){
+    intersecciones[id]=new Interseccion(direcciones,id,x,y,sizeRect);
 }
 
 void Grafo::calcularDistancia(){

@@ -13,14 +13,14 @@ public:
     bool semaforo=false;
     string color="green";
     
-    Interseccion(string direccion[2], int iD, int xpos, int ypos){
+    Interseccion(string direccion[2], int iD, int xpos, int ypos, int sizeRect){
         direcciones[0]=direccion[0];
         direcciones[1]=direccion[1];
         id=iD; 
         x=xpos; 
         y=ypos;
-        xTemporal=xpos/100;
-        yTemporal=ypos/100;
+        xTemporal=xpos/(sizeRect*10);
+        yTemporal=ypos/(sizeRect*10);
     }
 };
 
