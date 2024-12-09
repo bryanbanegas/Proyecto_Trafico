@@ -1,15 +1,9 @@
 #ifndef VEHICULO_H
 #define VEHICULO_H
-
-#include <SDL2/SDL.h>      
+#include <SDL2/SDL.h>     
+#include <SDL2/SDL_ttf.h> 
 #include <iostream>         
-#include <cstdlib>    
-#include "grafo.h"   
-using namespace std;
-
-#include <SDL2/SDL.h>      
-#include <iostream>         
-#include <cstdlib>    
+#include <cstdlib>
 #include "grafo.h"   
  
 using namespace std;
@@ -31,7 +25,7 @@ public:
     int xpos, ypos, originalX, originalY;
 
     Vehiculo(int id, string direccion, bool ambulance, SDL_Renderer *ren, int x, int y, vector<int> camino);
-    ~Vehiculo();
+    ~Vehiculo(){}
 
     string movimiento(const Grafo &ciudad,const int sizeRecrt);
     void Render(const int sizeRecrt);

@@ -1,7 +1,7 @@
 #include "vehiculo.h"
 
-Vehiculo::Vehiculo(int id, string direccion, bool ambulance, SDL_Renderer *rend, int x, int y, vector<int> camino)
-    : id(id), direccion(direccion), ambulance(ambulance), renderer(rend), xpos(x), ypos(y), camino(camino){
+Vehiculo::Vehiculo(int iD, string Direccion, bool Ambulance, SDL_Renderer *rend, int x, int y, vector<int> Camino)
+    : id(iD), direccion(Direccion), ambulance(Ambulance), renderer(rend), xpos(x), ypos(y), camino(Camino){
     caminosRecorridos.resize(camino.size(),-1);
     srcRect.x=xpos;
     srcRect.y=ypos;
@@ -9,8 +9,6 @@ Vehiculo::Vehiculo(int id, string direccion, bool ambulance, SDL_Renderer *rend,
     srcRect.h=20;
     originalDireccion=direccion;
 }
-
-Vehiculo::~Vehiculo() {}
 
 string Vehiculo::movimiento(const Grafo &ciudad, const int sizeRecrt){
     srcRect.x=xpos;
@@ -35,6 +33,8 @@ string Vehiculo::movimiento(const Grafo &ciudad, const int sizeRecrt){
         }else if(direccion=="down"){
             srcRect.y++;
             ypos=srcRect.y;
+        }else if(direccion=="destino"){
+            return direccion;
         }
         caminosRecorridos[0]=0;
         caminosRecorridos[1]=1;

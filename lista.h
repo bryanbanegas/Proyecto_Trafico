@@ -6,7 +6,7 @@ protected:
     int n=rand();
 public:
     bool choque=false;
-    int cantidadDeVehiculos=0, choqueX, choqueY, numeroDeChoques=0, id1, id2;
+    int cantidadDeVehiculos=0, choqueX, choqueY, numeroDeChoques=0, id1=0, id2=0;
     Lista():listaDeVehiculos(nullptr){}
     ~Lista(){
         Vehiculo* actual=listaDeVehiculos;
@@ -17,9 +17,9 @@ public:
         }
     }
 
-    void agregar(string direccion, float velocidad, SDL_Renderer *ren, int x, int y, vector<int> camino){
+    void agregar(string direccion, bool ambulance, SDL_Renderer *ren, int x, int y, vector<int> camino){
         cantidadDeVehiculos++;
-        Vehiculo* nuevoVehiculo=new Vehiculo(cantidadDeVehiculos,direccion,velocidad,ren,x,y,camino);
+        Vehiculo* nuevoVehiculo=new Vehiculo(cantidadDeVehiculos,direccion,ambulance,ren,x,y,camino);
         if(listaDeVehiculos==nullptr){
             listaDeVehiculos=nuevoVehiculo;
         }else{
@@ -41,18 +41,16 @@ public:
                 listaDeVehiculos=listaDeVehiculos->siguiente;
                 delete temporal;
                 cantidadDeVehiculos--;
-            }else{
-                Vehiculo *actual=listaDeVehiculos;
-                Vehiculo *anterior=nullptr;
-                while(actual!=nullptr){
-                    if(actual->getID()==id){
-                        anterior->siguiente=actual->siguiente;
-                        delete actual;
-                        cantidadDeVehiculos--;
-                        break;
-                    }
-                    actual=actual->siguiente;
-                }
+                return;
+            }
+            Vehiculo *anterior=nullptr;
+            while(actual!=nullptr&&actual->getID()!=id){
+                anterior=actual;
+                actual=actual->siguiente;
+            }
+            if(actual!=nullptr){
+                anterior->siguiente=actual->siguiente;
+                delete actual;
             }
         }
     }
@@ -73,7 +71,7 @@ public:
     void move(Grafo &ciudad, int sizeRect){
         Vehiculo *actual=listaDeVehiculos;
         while(actual!=nullptr){
-            if(!checkCollision(actual)){
+            if(!checkCollision(actual,ciudad)){
                 if(actual->move){
                     if(actual->movimiento(ciudad,sizeRect)=="destino"){
                         if(actual->ambulance){
@@ -110,14 +108,14 @@ public:
         }
     }
 
-    bool checkCollision(Vehiculo *srcRect){
+    bool checkCollision(Vehiculo *srcRect,Grafo &ciudad){
         Vehiculo *actual=listaDeVehiculos;
         while(actual!=nullptr){
             if(srcRect->getID()!=actual->getID()){
-                if(!(srcRect->ypos+30<=actual->ypos||
-                srcRect->ypos>=actual->ypos+30||
-                srcRect->xpos+30<=actual->xpos||
-                srcRect->xpos>=actual->xpos+30)){
+                if(!(srcRect->ypos+srcRect->getRect().w<=actual->ypos||
+                srcRect->ypos>=actual->ypos+srcRect->getRect().w||
+                srcRect->xpos+srcRect->getRect().w<=actual->xpos||
+                srcRect->xpos>=actual->xpos+srcRect->getRect().w)){
                     if(srcRect->getDireccion()==actual->getDireccion()){
                         if(!srcRect->move){
                             return true;
@@ -158,6 +156,12 @@ public:
                         if(srcRect->ambulance){
                             if(actual->getDireccion()=="choco"){
                                 srcRect->setDireccion("destino");
+                                numeroDeChoques=0;
+                                Interseccion *inter;
+                                for(auto &pair:ciudad.intersecciones){
+                                    inter=pair.second;
+                                    inter->disponible=true;
+                                }
                                 return false;
                             }
                             if(srcRect->xpos>actual->xpos){
@@ -204,7 +208,7 @@ public:
             actual=actual->siguiente;
         }
         if(srcRect->moveForAmbulance){
-            if(!collision(srcRect->xpos,srcRect->ypos)){
+            if(!collision(srcRect->xpos,srcRect->ypos,srcRect->getRect().w)){
                 if(srcRect->xpos==srcRect->originalX&&srcRect->ypos==srcRect->originalY){
                     srcRect->setDireccion(srcRect->originalDireccion);
                     srcRect->moveForAmbulance=false;
@@ -230,7 +234,7 @@ public:
         }
     }
 
-    bool collision(int x, int y){
+    bool collision(int x, int y, int w){
         Vehiculo* actual=listaDeVehiculos;
         while(actual!=nullptr){
             if(!(y+31<=actual->ypos||

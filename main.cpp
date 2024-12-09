@@ -9,9 +9,12 @@ Grafo ciudad;
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *backgroundTexture;
+SDL_Surface *textSurface;
+SDL_Texture *textTexture;
+TTF_Font *font;
 bool build=true;
 int sizeRect=10;
-float delayPorZoom=10;
+string climaActual="Dia Soleado";
 //Hola, Analfabeto. Suerte!! xoxo (jenn)
 
 void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
@@ -35,7 +38,8 @@ void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
         ciudad.agregarInterseccion(direcciones2,9,300,300);
 
         vector<int> sinCamino;
-        vehiculos.agregar("right",false, renderer, 100, 100, sinCamino);
+        vehiculos.agregar("left",false, renderer, 280, 100, sinCamino);
+        vehiculos.agregar("up",false, renderer, 200, 180, sinCamino);
     
         ciudad.agregarCalle(0,1);
         ciudad.agregarCalle(1,2);
@@ -71,7 +75,7 @@ void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
     int n=0;
     for(auto &pair:ciudad.intersecciones){
         inter=pair.second;
-        n=inter->y/100;
+        n=inter->yTemporal;
         if(n%2!=0&&inter->x!=0){
             inter->semaforo=true;
         }
@@ -95,16 +99,32 @@ void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_Rect button;
-    button={700, 0, 50, 50};
+    SDL_Color textColor={0,0,0,255};
+    button={0, 0, 100, 50};
+    textSurface=TTF_RenderText_Solid(font, "Add V", textColor);
+    textTexture=SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_RenderFillRect(renderer, &button);
-    button={700, 100, 50, 50};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &button);
+    button={120, 0, 100, 50};
+    textSurface=TTF_RenderText_Solid(font, "Add I", textColor);
+    textTexture=SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_RenderFillRect(renderer, &button);
-    button={700, 200, 50, 50};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &button);
+    button={240, 0, 100, 50};
+    textSurface=TTF_RenderText_Solid(font, "Zoom--", textColor);
+    textTexture=SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_RenderFillRect(renderer, &button);
-    button={700, 300, 50, 50};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &button);
+    button={360, 0, 100, 50};
+    textSurface=TTF_RenderText_Solid(font, "Zoom++", textColor);
+    textTexture=SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_RenderFillRect(renderer, &button);
-    button={760, 300, 50, 50};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &button);
+    button={480, 0, 100, 50};
+    textSurface=TTF_RenderText_Solid(font, climaActual.c_str(), textColor);
+    textTexture=SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_RenderFillRect(renderer, &button);
+    SDL_RenderCopy(renderer, textTexture, nullptr, &button);
 }
 double calculateDistance(int x1, int y1, int x2, int y2) {
     return std::sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
@@ -139,7 +159,7 @@ void addVehiculo(){
     while(!terminar){
         n=rand()%ciudad.intersecciones.size();
         if(ciudad.intersecciones.at(n)->disponible){
-            if(!vehiculos.collision(ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y)){
+            if(!vehiculos.collision(ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y,sizeRect+10)){
                 vehiculos.agregar(ciudad.intersecciones.at(n)->direcciones[0],false,renderer,ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y,sincamino);
                 terminar=true;
                 cout<<"Se creo un vehiculo."<<endl;
@@ -266,11 +286,15 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    if(TTF_Init()==-1){
+        cout<<"Error: "<<TTF_GetError()<<endl;
+        SDL_Quit();
+        return -1;
+    }
+
     window=SDL_CreateWindow("Title", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1000, 1000, SDL_WINDOW_SHOWN);
     if(!window){
         cout<<"Error: "<<SDL_GetError()<<endl;
-        SDL_DestroyRenderer(nullptr);
-        SDL_DestroyWindow(nullptr);
         SDL_Quit();
         return -1;
     }
@@ -283,9 +307,18 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    font=TTF_OpenFont("/usr/share/fonts/truetype/ubuntu/UbuntuMono-B.ttf",48);
+    if(!font){
+        cout<<"Error: "<<TTF_GetError()<<endl;
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        TTF_Quit();
+        SDL_Quit();
+        return -1;
+    }
+
     createBackgroundTexture();
 
-    string climaActual="Dia Soleado";
     bool run=true;
     SDL_Event event;
     Interseccion *inter;
@@ -297,16 +330,13 @@ int main(int argc, char *argv[]) {
             }else if(event.type==SDL_MOUSEBUTTONDOWN){
                 int x,y;
                 SDL_GetMouseState(&x,&y);
-                if(x>=700&&x<=750&&y>=0&&y<=50){
+                if(x>=0&&x<=100&&y>=0&&y<=50){
                     addVehiculo();
                 }
-                if(x>=700&&x<=750&&y>=100&&y<=150){
+                if(x>=120&&x<=220&&y>=0&&y<=50){
                     addCalle();
                 }
-                if(x>=700&&x<=750&&y>=200&&y<=250){
-                    addVehiculo();
-                }
-                if(x>=700&&x<=750&&y>=300&&y<=350){
+                if(x>=240&&x<=340&&y>=0&&y<=50&&sizeRect>4){
                     int mult, n=sizeRect;
                     sizeRect--;
                     for(auto &pair:ciudad.intersecciones){
@@ -318,8 +348,9 @@ int main(int argc, char *argv[]) {
                     ciudad.calcularDistancia();
                     vehiculos.updatePos(n);
                     createBackgroundTexture();
+                    cout<<sizeRect<<endl;
                 }
-                if(x>=760&&x<=810&&y>=300&&y<=350){
+                if(x>=360&&x<=460&&y>=0&&y<=50){
                     int mult, n=-sizeRect;
                     sizeRect++;
                     for(auto &pair:ciudad.intersecciones){
@@ -332,10 +363,17 @@ int main(int argc, char *argv[]) {
                     vehiculos.updatePos(n);
                     createBackgroundTexture();
                 }
+                if(x>=480&&x<=580&&y>=0&&y<=50){
+                    string arr[]={"Dia Soleado", "Tormenta", "Nevada", "Tormenta Electrica"};
+                    int n=rand()%4;
+                    climaActual=arr[n];
+                    cout<<"El clima actual es: "<<climaActual<<endl;
+                }
             }
         }
 
-        SDL_Delay(arbolDeClimas.getRangoDeClima(climaActual)/sizeRect);
+        SDL_Delay(arbolDeClimas.getRangoDeClima(climaActual));
+        SDL_Delay(50/sizeRect);
         vehiculos.move(ciudad,sizeRect);
         if(vehiculos.choque){
             int destino=blockIntersection(vehiculos.choqueX,vehiculos.choqueY);
