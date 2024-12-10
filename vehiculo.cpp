@@ -17,23 +17,34 @@ string Vehiculo::movimiento(const Grafo &ciudad, const int sizeRecrt){
     srcRect.h=sizeRecrt+10;
     string dir[2];
     int n=rand(),contar=-1;
-    bool terminar=false,yaRecorrido=false;
     Interseccion *inter,*inter2;
-
-    if(ambulance){
-        if(direccion=="right"){
+    if(direccion=="right"){
+        srcRect.x++;
+        if(ambulance){
             srcRect.x++;
-            xpos=srcRect.x;
-        }else if(direccion=="left"){
+        }
+        xpos=srcRect.x;
+    }else if(direccion=="left"){
+        srcRect.x--;
+        if(ambulance){
             srcRect.x--;
-            xpos=srcRect.x;
-        }else if(direccion=="up"){
+        }
+        xpos=srcRect.x;
+    }else if(direccion=="up"){
+        srcRect.y--;
+        if(ambulance){
             srcRect.y--;
-            ypos=srcRect.y;
-        }else if(direccion=="down"){
+        }
+        ypos=srcRect.y;
+    }else if(direccion=="down"){
+        srcRect.y++;
+        if(ambulance){
             srcRect.y++;
-            ypos=srcRect.y;
-        }else if(direccion=="destino"){
+        }
+        ypos=srcRect.y;
+    }
+    if(ambulance){
+        if(direccion=="destino"){
             return direccion;
         }
         caminosRecorridos[0]=0;
@@ -176,20 +187,6 @@ string Vehiculo::movimiento(const Grafo &ciudad, const int sizeRecrt){
                 }
             }
         }
-    }
-
-    if(direccion=="right"){
-        srcRect.x++;
-        xpos=srcRect.x;
-    }else if(direccion=="left"){
-        srcRect.x--;
-        xpos=srcRect.x;
-    }else if(direccion=="up"){
-        srcRect.y--;
-        ypos=srcRect.y;
-    }else if(direccion=="down"){
-        srcRect.y++;
-        ypos=srcRect.y;
     }
 
     return direccion;

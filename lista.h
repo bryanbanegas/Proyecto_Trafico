@@ -116,37 +116,24 @@ public:
                 srcRect->ypos>=actual->ypos+srcRect->getRect().w||
                 srcRect->xpos+srcRect->getRect().w<=actual->xpos||
                 srcRect->xpos>=actual->xpos+srcRect->getRect().w)){
-                    if(srcRect->getDireccion()==actual->getDireccion()){
+                    if(srcRect->originalDireccion==actual->originalDireccion){
                         if(!srcRect->move){
                             return true;
                         }else{
                             if(srcRect->ambulance){
-                                if(!actual->ambulance){
-                                    if(srcRect->xpos<actual->xpos||srcRect->ypos<actual->ypos){
-                                        actual->originalX=actual->xpos;
-                                        actual->originalY=actual->ypos;
-                                        actual->originalDireccion=actual->getDireccion();
-                                        if(srcRect->getDireccion()=="up"||srcRect->getDireccion()=="down"){
-                                            actual->moveForAmbulance=true;
-                                            actual->move=true;
-                                            actual->setDireccion("right");
-                                        }else if(srcRect->getDireccion()=="right"||srcRect->getDireccion()=="left"){
-                                            actual->moveForAmbulance=true;
-                                            actual->move=true;
-                                            actual->setDireccion("up");
-                                        }
-                                    }else{
-                                        if(srcRect->getDireccion()=="up"||srcRect->getDireccion()=="down"){
-                                            actual->moveForAmbulance=true;
-                                            actual->move=true;
-                                            actual->setDireccion("left");
-                                        }else if(srcRect->getDireccion()=="right"||srcRect->getDireccion()=="left"){
-                                            actual->moveForAmbulance=true;
-                                            actual->move=true;
-                                            actual->setDireccion("down");
-                                        }
-                                    }
+                                actual->originalX=actual->xpos;
+                                actual->originalY=actual->ypos;
+                                actual->originalDireccion=actual->getDireccion();
+                                if(srcRect->getDireccion()=="up"||srcRect->getDireccion()=="down"){
+                                    actual->moveForAmbulance=true;
+                                    actual->move=true;
+                                    actual->setDireccion("right");
+                                }else if(srcRect->getDireccion()=="right"||srcRect->getDireccion()=="left"){
+                                    actual->moveForAmbulance=true;
+                                    actual->move=true;
+                                    actual->setDireccion("up");
                                 }
+                                srcRect->move=false;
                                 return true;
                             }else{
                                 return false;
@@ -170,17 +157,9 @@ public:
                                 actual->move=false;
                                 return true;
                             }
-                        }else if(actual->ambulance){
-                            if(srcRect->xpos<actual->xpos){
-                                return false;
-                            }else{
-                                srcRect->move=false;
-                                return true;
-                            }   
                         }else{
                             n=rand()%100;
-                            n=8;
-                            if(n<10&&numeroDeChoques==0){
+                            if(n<10&&numeroDeChoques==0&&!srcRect->noChocar&&srcRect->xpos<=300&&srcRect->xpos>=100&&srcRect->ypos<=300&&srcRect->ypos>=100){
                                 numeroDeChoques++;
                                 choque=true;
                                 choqueX=srcRect->xpos;
@@ -188,9 +167,15 @@ public:
                                 id1=srcRect->getID();
                                 id2=actual->getID();
                                 srcRect->setDireccion("choco");
+                                srcRect->originalDireccion="choco";
                                 actual->setDireccion("choco");
+                                actual->originalDireccion="choco";
                             }else{
-                                if(srcRect->xpos>actual->xpos){
+                                srcRect->noChocar=true;
+                                actual->noChocar=true;
+                                if(srcRect->xpos>actual->xpos&&srcRect->getDireccion()=="right"){
+                                    return false;
+                                }else if(srcRect->xpos<actual->xpos&&srcRect->getDireccion()=="left"){
                                     return false;
                                 }else{
                                     if(actual->move){
@@ -208,7 +193,7 @@ public:
             actual=actual->siguiente;
         }
         if(srcRect->moveForAmbulance){
-            if(!collision(srcRect->xpos,srcRect->ypos,srcRect->getRect().w)){
+            if(!collision(srcRect)){
                 if(srcRect->xpos==srcRect->originalX&&srcRect->ypos==srcRect->originalY){
                     srcRect->setDireccion(srcRect->originalDireccion);
                     srcRect->moveForAmbulance=false;
@@ -229,21 +214,36 @@ public:
             }
             return false;
         }else{
+            srcRect->noChocar=false;
             srcRect->move=true;
             return false;
         }
     }
 
-    bool collision(int x, int y, int w){
-        Vehiculo* actual=listaDeVehiculos;
+    bool collision(Vehiculo *srcRect){
+        Vehiculo *actual=listaDeVehiculos;
         while(actual!=nullptr){
-            if(!(y+31<=actual->ypos||
-            y>=actual->ypos+31||
-            x+31<=actual->xpos||
-            x>=actual->xpos+31)){
-                if(!actual->ambulance){
+            if(srcRect->getID()!=actual->getID()){
+                if(!(srcRect->ypos+srcRect->getRect().w+1<=actual->ypos||
+                srcRect->ypos>=actual->ypos+srcRect->getRect().w+1||
+                srcRect->xpos+srcRect->getRect().w+1<=actual->xpos||
+                srcRect->xpos>=actual->xpos+srcRect->getRect().w+1)){
                     return true;
                 }
+            }
+            actual=actual->siguiente;
+        }
+        return false;
+    }
+
+    bool collisionForAdd(int x, int y, int w){
+        Vehiculo* actual=listaDeVehiculos;
+        while(actual!=nullptr){
+            if(!(y+w<=actual->ypos||
+            y>=actual->ypos+w||
+            x+w<=actual->xpos||
+            x>=actual->xpos+w)){
+                return true;
             }
             actual=actual->siguiente;
         }

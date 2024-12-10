@@ -38,7 +38,7 @@ void buildCity(Grafo &ciudad, SDL_Renderer *renderer){
         ciudad.agregarInterseccion(direcciones2,9,300,300,sizeRect);
 
         vector<int> sinCamino;
-        vehiculos.agregar("right",false, renderer, 280, 300, sinCamino);
+        vehiculos.agregar("right",false, renderer, 100, 100, sinCamino);
     
         ciudad.agregarCalle(0,1);
         ciudad.agregarCalle(1,2);
@@ -157,8 +157,12 @@ void addVehiculo(){
     while(!terminar){
         n=rand()%ciudad.intersecciones.size();
         if(ciudad.intersecciones.at(n)->disponible){
-            if(!vehiculos.collision(ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y,sizeRect+10)){
-                vehiculos.agregar(ciudad.intersecciones.at(n)->direcciones[0],false,renderer,ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y,sincamino);
+            if(!vehiculos.collisionForAdd(ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y,sizeRect+10)){
+                if(ciudad.intersecciones.at(n)->direcciones[0]=="right"){
+                    vehiculos.agregar(ciudad.intersecciones.at(n)->direcciones[0],false,renderer,ciudad.intersecciones.at(n)->x-1,ciudad.intersecciones.at(n)->y,sincamino);
+                }else if(ciudad.intersecciones.at(n)->direcciones[0]=="left"){
+                    vehiculos.agregar(ciudad.intersecciones.at(n)->direcciones[0],false,renderer,ciudad.intersecciones.at(n)->x+1,ciudad.intersecciones.at(n)->y,sincamino);
+                }
                 terminar=true;
                 cout<<"Se creo un vehiculo."<<endl;
             }
@@ -245,8 +249,6 @@ void addCalle(){
                     dir[0]=ciudad.intersecciones.at(n)->direcciones[0];
                     ciudad.agregarInterseccion(dir,num,ciudad.intersecciones.at(n)->x+ciudad.distancia,ciudad.intersecciones.at(n)->y,sizeRect);
                     ciudad.agregarCalle(ciudad.intersecciones.at(n)->id,num);
-                    cout<<"Cordenadas: "<<ciudad.intersecciones.at(n)->x+ciudad.distancia<<" "<<ciudad.intersecciones.at(n)->y<<endl;
-                    cout<<"Cordenadas Temporales: "<<ciudad.intersecciones.at(n)->x+ciudad.distancia/100<<" "<<ciudad.intersecciones.at(n)->y/100<<endl;
                     terminar=true;
                 }else if(crearIzquierda){
                     string dir[2];
@@ -258,8 +260,7 @@ void addCalle(){
                     dir[0]=ciudad.intersecciones.at(n)->direcciones[0];
                     ciudad.agregarInterseccion(dir,num,ciudad.intersecciones.at(n)->x-ciudad.distancia,ciudad.intersecciones.at(n)->y,sizeRect);
                     ciudad.agregarCalle(ciudad.intersecciones.at(n)->id,num);
-                    cout<<"Cordenadas: "<<ciudad.intersecciones.at(n)->x-ciudad.distancia<<" "<<ciudad.intersecciones.at(n)->y<<endl;
-                    cout<<"Cordenadas Temporales: "<<ciudad.intersecciones.at(n)->x-ciudad.distancia/100<<" "<<ciudad.intersecciones.at(n)->y/100<<endl;
+                    cout<<num<<endl;
                     terminar=true;
                 }else if(crearAbajo){
                     string dir[2];
@@ -271,8 +272,6 @@ void addCalle(){
                     dir[1]=ciudad.intersecciones.at(n)->direcciones[1];
                     ciudad.agregarInterseccion(dir,num,ciudad.intersecciones.at(n)->x,ciudad.intersecciones.at(n)->y+ciudad.distancia,sizeRect);
                     ciudad.agregarCalle(ciudad.intersecciones.at(n)->id,num);
-                    cout<<"Cordenadas: "<<ciudad.intersecciones.at(n)->x<<" "<<ciudad.intersecciones.at(n)->y+ciudad.distancia<<endl;
-                    cout<<"Cordenadas Temporales: "<<ciudad.intersecciones.at(n)->x/100<<" "<<ciudad.intersecciones.at(n)->y+ciudad.distancia/100<<endl;
                     terminar=true;
                 }
             }
@@ -352,7 +351,7 @@ int main(int argc, char *argv[]) {
                     ciudad.calcularDistancia();
                     vehiculos.updatePos(n);
                     createBackgroundTexture();
-                    cout<<sizeRect<<endl;
+                    contar=0;
                 }
                 if(x>=360&&x<=460&&y>=0&&y<=50){
                     int mult, n=-sizeRect;
@@ -366,6 +365,7 @@ int main(int argc, char *argv[]) {
                     ciudad.calcularDistancia();
                     vehiculos.updatePos(n);
                     createBackgroundTexture();
+                    contar=0;
                 }
                 if(x>=480&&x<=580&&y>=0&&y<=50){
                     string arr[]={"Dia Soleado", "Tormenta", "Nevada", "Tormenta Electrica"};
@@ -373,12 +373,13 @@ int main(int argc, char *argv[]) {
                     climaActual=arr[n];
                     cout<<"El clima actual es: "<<climaActual<<endl;
                     createBackgroundTexture();
+                    contar=0;
                 }
             }
         }
 
         SDL_Delay(arbolDeClimas.getRangoDeClima(climaActual));
-        SDL_Delay(50/sizeRect);
+        SDL_Delay(100/sizeRect);
         vehiculos.move(ciudad,sizeRect);
         if(vehiculos.choque){
             int destino=blockIntersection(vehiculos.choqueX,vehiculos.choqueY);
@@ -386,14 +387,14 @@ int main(int argc, char *argv[]) {
             int distancia=ciudad.dijkstra(0,destino,padres);
             if(destino!=-1){
                 vector<int> camino=ciudad.reconstruirCamino(0,destino,padres);
-                vehiculos.agregar("right", true, renderer, 0, 100, camino);
+                vehiculos.agregar("right", true, renderer, ciudad.intersecciones.at(0)->x, ciudad.intersecciones.at(0)->y, camino);
             }else{
                 cout<<"no funciono"<<endl;
             }
             vehiculos.choque=false;
         }
         contar++;
-        if(contar==100){
+        if(contar==sizeRect*10){
             for(auto &pair:ciudad.intersecciones){
                 inter=pair.second;
                 if(inter->semaforo){

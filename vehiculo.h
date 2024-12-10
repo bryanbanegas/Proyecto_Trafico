@@ -17,9 +17,7 @@ private:
 public:
     Vehiculo *siguiente=nullptr;
     string originalDireccion;
-    bool ambulance;
-    bool move=true;
-    bool moveForAmbulance=false;
+    bool ambulance, move=true, moveForAmbulance=false, noChocar=false;
     const vector<int> camino;
     vector<int>  caminosRecorridos;
     int xpos, ypos, originalX, originalY;
